@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if (( $# != 2 )); then
-    printf 'Usage: %s BUILD_DIR NEW_EXPORT_DIR\n' "$0" >&2
+if (( $# != 0 && $# != 2 )); then
+    printf 'Usage: %s [BUILD_DIR NEW_EXPORT_DIR]\n' "$0" >&2
     exit 2
 fi
 
 tools=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 source_dir=${KERNEL_SOURCE:-/home/atom/Desktop/android_kernel_xiaomi_sm6375}
 clang_bin=${CLANG_BIN:-/home/atom/kernel-toolchains/clang-r487747c/clang-r487747c/bin}
-build_dir=$(realpath -m -- "$1")
-destination=$(realpath -m -- "$2")
+build_dir=$(realpath -m -- "${1:-$source_dir/out-spring-fresh}")
+destination=$(realpath -m -- "${2:-/home/atom/Desktop/spring-prebuilt-fresh}")
+
+if (( $# == 0 )) && [[ -e "$build_dir" ]]; then
+    printf 'Default build directory already exists: %s\nPass two new paths for another fresh build.\n' "$build_dir" >&2
+    exit 2
+fi
 
 if [[ "$build_dir" =~ [[:space:]] || -e "$destination" ]]; then
     printf 'Use a build directory without spaces and a new export directory.\n' >&2
