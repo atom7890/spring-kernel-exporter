@@ -23,7 +23,7 @@ def run(*args):
 
 
 def module_name(name):
-    return name.removesuffix(".ko").replace("-", "_")
+    return Path(name).name.removesuffix(".ko").replace("-", "_")
 
 
 def main():
@@ -160,6 +160,12 @@ def main():
             run(build / "scripts/sign-file", "sha256", build / "certs/signing_key.pem",
                 build / "certs/signing_key.x509", dst)
         signed[name] = dst
+
+    system_load = entries(MANIFESTS / "system_dlkm.modules.load")
+    (system_release / "modules.load").write_text(
+        "".join(f"{signed[Path(path).name].relative_to(system_release)}\n"
+                for path in system_load)
+    )
 
     # depmod expects a lib/modules/<release> hierarchy.
     depmod_root = output / ".depmod"
