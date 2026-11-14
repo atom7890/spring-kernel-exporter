@@ -102,9 +102,9 @@ def main():
             shutil.copy2(exported, dest)
 
     vendor_uapi = (
-        ("audio", "audio/audio-kernel/include/uapi"),
-        ("display", "display/display-drivers/include/uapi"),
-        ("linux", "dataipa/dataipa/drivers/platform/msm/include/uapi"),
+        ("audio", "audio/include/uapi"),
+        ("display", "display/include/uapi"),
+        ("linux", "dataipa/drivers/platform/msm/include/uapi"),
     )
     for subsystem, tree in vendor_uapi:
         uapi = source / "techpack" / tree
@@ -119,10 +119,9 @@ def main():
                     shutil.copy2(dest, alias)
 
     extra_uapi = {
-        "linux/nfc/nfcinfo.h": "nfc/nxp/opensource/driver/include/uapi/linux/nfc/nfcinfo.h",
-        "linux/qseecom.h": "securemsm/securemsm-kernel/include/uapi/linux/qseecom.h",
-        "linux/qti-smmu-proxy.h": "securemsm/securemsm-kernel/smmu-proxy/include/uapi/linux/qti-smmu-proxy.h",
-        "linux/ubwcp_ioctl.h": "multimedia/mm-sys-kernel/ubwcp/include/uapi/ubwcp_ioctl.h",
+        "linux/nfc/nfcinfo.h": "nfc/include/uapi/linux/nfc/nfcinfo.h",
+        "linux/qseecom.h": "securemsm/include/uapi/linux/qseecom.h",
+        "linux/qti-smmu-proxy.h": "securemsm/include/uapi/linux/qti-smmu-proxy.h",
     }
     for relative, header in extra_uapi.items():
         install_uapi(source / "techpack" / header, headers / relative)
