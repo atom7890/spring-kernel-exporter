@@ -33,8 +33,8 @@ work=$(mktemp -d /tmp/spring-standalone-install.XXXXXX)
 trap 'rm -rf -- "$work"' EXIT
 args=(-C "$source_dir" O="$build_dir" ARCH=arm64 LLVM=1 LLVM_IAS=1 TARGET_BOARD_PLATFORM=blair)
 make "${args[@]}" spring_defconfig
-make -j"${JOBS:-8}" "${args[@]}" Image modules dtbs
+make -j"${JOBS:-20}" "${args[@]}" Image modules dtbs
 make "${args[@]}" headers_install INSTALL_HDR_PATH="$build_dir/headers"
-make -j"${JOBS:-8}" "${args[@]}" INSTALL_MOD_PATH="$work/installed" INSTALL_MOD_STRIP=1 modules_install
+make -j"${JOBS:-20}" "${args[@]}" INSTALL_MOD_PATH="$work/installed" INSTALL_MOD_STRIP=1 modules_install
 python3 "$tools/export.py" "$build_dir" "$work/installed" - "$destination" --source "$source_dir"
 (cd "$destination" && sha256sum --quiet -c SHA256SUMS)
