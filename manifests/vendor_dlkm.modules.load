@@ -281,7 +281,6 @@ cdsp-loader.ko
 hardwareinfo.ko
 msm-mmrm.ko
 mmrm_test_module.ko
-nxp-nci.ko
 qcedev-mod_dlkm.ko
 qcrypto-msm_dlkm.ko
 qce50_dlkm.ko

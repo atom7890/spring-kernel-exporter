@@ -154,7 +154,6 @@ nfc_i2c.ko
 nt36xxx_spi.ko
 nvmem_qcom-spmi-sdam.ko
 nvmem_qfprom.ko
-nxp-nci.ko
 ofpart.ko
 panel_event_notifier.ko
 pd_policy_manager.ko
