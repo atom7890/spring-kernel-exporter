@@ -5,11 +5,15 @@ set -euo pipefail
 
 usage() {
     cat >&2 <<USAGE
-Usage: $0 [--check] [BUILD_DIR NEW_EXPORT_DIR]
+Usage: $0 [--check] [--replace-export] [BUILD_DIR EXPORT_DIR]
 
-  BUILD_DIR       kernel output directory (default: <source>/out-spring-fresh)
-  NEW_EXPORT_DIR  directory to create for the export (default: ./spring-prebuilt-fresh)
+  BUILD_DIR       kernel output directory (default: <source>/out-spring-kernel-oss)
+  EXPORT_DIR      directory to create for the export (default: ./spring-kernel-oss)
+                  It must not exist yet, unless you pass --replace-export.
   --check         print the detected settings and tools, then exit
+  --replace-export  delete EXPORT_DIR first if it is an earlier export (has SHA256SUMS)
+
+BUILD_DIR may already exist: it is reused, so the kernel build is incremental.
 
 Environment:
   KERNEL_SOURCE   Spring kernel checkout (default: current directory, or the
@@ -22,8 +26,16 @@ USAGE
 }
 
 check_only=0
-if [[ ${1:-} == --check ]]; then check_only=1; shift; fi
-[[ ${1:-} == -h || ${1:-} == --help ]] && usage
+replace_export=0
+while [[ ${1:-} == --* || ${1:-} == -h ]]; do
+    case $1 in
+        --check) check_only=1 ;;
+        --replace-export) replace_export=1 ;;
+        -h|--help) usage ;;
+        *) printf 'Unknown option: %s\n' "$1" >&2; usage ;;
+    esac
+    shift
+done
 if (( $# != 0 && $# != 2 )); then usage; fi
 
 tools=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -79,8 +91,8 @@ for command in make clang ld.lld llvm-ar llvm-strip pahole lz4 depmod modinfo op
 done
 
 # --- output locations -------------------------------------------------------
-build_dir=$(realpath -m -- "${1:-$source_dir/out-spring-fresh}")
-destination=$(realpath -m -- "${2:-$PWD/spring-prebuilt-fresh}")
+build_dir=$(realpath -m -- "${1:-$source_dir/out-spring-kernel-oss}")
+destination=$(realpath -m -- "${2:-$PWD/spring-kernel-oss}")
 
 if (( check_only )); then
     printf 'source      : %s\nbuild dir   : %s\nexport dir  : %s\nclang       : %s\njobs        : %s\n' \
@@ -99,9 +111,21 @@ if (( $# == 0 )) && [[ -e "$build_dir" ]]; then
     printf 'Default build directory already exists: %s\nPass two new paths for another fresh build.\n' "$build_dir" >&2
     exit 2
 fi
-if [[ "$build_dir" =~ [[:space:]] || -e "$destination" ]]; then
-    printf 'Use a build directory without spaces and a new export directory.\n' >&2
+if [[ "$build_dir" =~ [[:space:]] || "$destination" =~ [[:space:]] ]]; then
+    printf 'Use folder paths without spaces.\n' >&2
     exit 2
+fi
+if [[ -e "$destination" ]]; then
+    if (( replace_export )) && [[ -f $destination/SHA256SUMS ]]; then
+        printf 'Removing the earlier export: %s\n' "$destination"
+        rm -rf -- "$destination"
+    elif (( replace_export )); then
+        printf '%s exists but is not an earlier export (no SHA256SUMS); not deleting it.\n' "$destination" >&2
+        exit 2
+    else
+        printf 'Export folder already exists: %s\nRemove it, pass a new path, or add --replace-export.\n' "$destination" >&2
+        exit 2
+    fi
 fi
 
 export LOCALVERSION=

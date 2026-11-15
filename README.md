@@ -28,8 +28,10 @@ Run from the kernel folder, or set `KERNEL_SOURCE`:
 | `JOBS` | parallel jobs | number of CPUs |
 | `TMPDIR` | scratch location | `/tmp` |
 
-With no arguments, the build goes to `<source>/out-spring-fresh` and the export
-to `./spring-prebuilt-fresh`; the script refuses to reuse an existing build folder.
+With no arguments, the build goes to `<source>/out-spring-kernel-oss` and the export
+to `./spring-kernel-oss`. A no-argument run refuses to reuse an existing build folder;
+pass both paths to reuse one (the kernel build is then incremental). The export folder
+must be new, or add `--replace-export` to replace an earlier export.
 
 `export.py` checks the built modules against `manifests/`. If you add or remove
 a kernel module, update the matching `*.list` and `*.modules.load` files.
